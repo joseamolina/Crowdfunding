@@ -1,0 +1,129 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="#{main.main_page}"></title>
+    
+    <link rel="stylesheet" href="css/bootstrap.min.css" th:href="@{css/bootstrap.min.css}"/>
+    <link rel="stylesheet" href="css/flag-icon.min.css" th:href="@{css/flag-icon.min.css}"/>
+    <meta charset="UTF-8"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    
+</head>
+<!-- It sets the vars local scope to be taken(credit available and Projects active) -->
+<body th:with="credit=${credit}, projects=${projects}, ownProjects=${ownProjects}, name=${name}, myProjects=${myProjects}">
+
+	<nav class="navbar navbar-inverse" th:fragment="header">
+	  <div class="container-fluid">
+	    <div class="navbar-header">
+	      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#cfNavbar">
+	        <span class="icon-bar"></span>
+	        <span class="icon-bar"></span>
+	        <span class="icon-bar"></span>                        
+	      </button>
+	      <a class="navbar-brand" href="/">CrowdFunding</a>
+	    </div>
+	    <div class="collapse navbar-collapse" id="cfNavbar">
+	      <ul class="nav navbar-nav">
+	        <li class="active"><a href="/" th:text="#{main.home}"></a></li>
+	        <li><a href="/?myProjects=true" th:href="@{/?myProjects=true}" th:text="#{main.my_projects}"></a></li>
+	        <li th:if="${myProjects}"><a href="/add_project" th:href="@{/add_project}" th:text="#{project.add}"></a></li>
+	      </ul>
+	      <ul class="nav navbar-nav navbar-right">
+	      	<li class="dropdown">
+	          <a class="dropdown-toggle" data-toggle="dropdown" href="#Language"><span th:text="#{main.language}"></span><span class="caret"></span></a>
+	          <ul class="dropdown-menu" th:with="baseUrl=(${myProjects}? '/?myProjects=true' : '/')">
+	            <li>
+		      		<a th:href="@{${baseUrl}(lang=FR)}"><span class="flag-icon flag-icon-fr"></span>	Français</a>
+		    	</li>
+		    	<li>
+		      		<a th:href="@{${baseUrl}(lang=EN)}"><span class="flag-icon flag-icon-gb"></span>	English</a>
+		    	</li>
+		    	<li>
+		      		<a th:href="@{${baseUrl}(lang=ES)}"><span class="flag-icon flag-icon-es"></span>	Español</a>
+		    	</li>
+		    	<!-- javascript:window.location.href=window.location.href -->
+	          </ul>
+	        </li>
+	      	<li class="dropdown">
+	          <a class="dropdown-toggle" data-toggle="dropdown" href="#User"><span class="glyphicon glyphicon-user" th:text="' '+${name}"></span><span class="caret"></span></a>
+	          <ul class="dropdown-menu">
+	            <li><a href="/update_user" th:href="@{/update_user}" th:text="#{user.edit_user}"></a></li>
+	            <li><a href="/update_user/password" th:href="@{/update_user/password}" th:text="#{user.edit_password}"></a></li>
+	            <li><a href="/login?logout" th:href="@{/login?logout}"><span class="glyphicon glyphicon-log-out"></span><span th:text="' ' + #{main.log_out}"></span></a></li>
+	          </ul>
+	        </li>
+	      </ul>
+	    </div>
+	  </div>
+	</nav>
+	
+	<div id="id01" class="modal">
+	  
+	  <form class="modal-content animate" action="#">
+	
+	    <div class="container">
+	      <label><b>Top Up</b></label>
+	      <input type="text" placeholder="Enter € number" name="uname" required="required"/>
+	
+	      <button type="submit">Top Up</button>
+	    </div>
+	
+	    <div class="container" style="background-color:#f1f1f1">
+	      <button type="button" onclick="document.getElementById('id01').style.display='none'" class="cancelbtn">Cancel</button>
+	    </div>
+	  </form>
+	</div>
+	
+	<div th:if="${not #lists.isEmpty( myProjects ? ownProjects : projects)}">		
+		<table class="table">					
+					<tr>
+						<th th:text="#{main.category}">Category</th>
+						<th th:text="#{main.name}">Name</th>
+						<th th:text="#{main.goal_amount}">Goal</th>
+						<th th:text="#{main.pledged_amount}">Amount pledged</th>
+						<th th:if="${myProjects}" th:text="#{main.operations}">Operations</th>
+					</tr>
+					
+					<tr th:each="project : ${( myProjects ? ownProjects : projects)}">
+				        <td th:text="${project.category.name}">Category</td>
+				        <td><a th:text="${project.name}" th:href="@{/projects/{id}(id=${project.id})}">Name</a></td>
+				        <td th:text="${project.fundingAmount}">Amount to get</td>
+				        <td th:text="${project.currentAmount}">Amount pledged</td>
+				        <td th:if="${myProjects}">
+				        	<a th:href="@{/update_project/{id}(id=${project.id})}" class="btn btn-default" th:text="#{project.edit}">Edit</a>
+				       		<a th:href="@{/?myProjects=true}" class="btn btn-default" th:text="#{project.delete}">Delete</a>
+				        <!--  
+				        	<form action="@{/update_project/{id}(id=${project.id})}" method="POST">
+    							<input type="submit" th:value="#{project.edit}"/>
+							</form>
+				        	<form action="" method="POST">
+    							<button type="submit" th:value="#{project.delete}">Delete</button>
+							</form>
+						-->
+				        </td>
+	      			</tr>	
+		</table>
+	</div>
+	
+	
+	
+	<p th:if="${#lists.isEmpty( myProjects ? ownProjects : projects)}"> There are no projects to show </p>
+	
+	<script>
+	
+		// Get the modal
+		var modal = document.getElementById('id01');
+		
+		// When the user clicks anywhere outside of the modal, close it
+		window.onclick = function(event) {
+		    if (event.target == modal) {
+		        modal.style.display = "none";
+		    }
+		}
+		
+	</script>
+	
+	
+</body>
+</html>
